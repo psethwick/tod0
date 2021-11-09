@@ -87,6 +87,25 @@ def rm(args):
     todo_api.remove_task(task_list, try_parse_as_int(name))
 
 
+def sync(args):
+    """
+    idea
+    find all the markdown files which have - [ ]
+    the filenames = task lists
+    if list doesn't exist, create
+        add each task if not exist (worry about subtasks... later)
+
+    need completed items as well as incomplete, probably
+
+
+    really need to work out this strategy, huh
+    """
+    for tl in todo_api.query_lists():
+        with open(args.folder + '/' + tl.display_name + '.md', 'w') as f:
+            for t in todo_api.query_tasks(tl.display_name):
+                f.write(f"{t.title}\n")
+
+
 class ArgumentParser(argparse.ArgumentParser):
     class OnExit(Exception):
         pass
@@ -155,12 +174,18 @@ def setup_parser():
         subparser.add_argument("task_name", help=helptext_task_name)
         subparser.set_defaults(func=rm)
 
+    def parser_sync():
+        subparser = subparsers.add_parser("sync", help="Sync tasks With local markdown files")
+        subparser.add_argument("folder", help="folder to sync markdown files with")
+        subparser.set_defaults(func=sync)
+
     parser_lst()
     parser_ls()
     parser_new()
     parser_newl()
     parser_complete()
     parser_rm()
+    parser_sync()
 
     parser.add_argument(
         "-n",
